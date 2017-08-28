@@ -14,6 +14,9 @@ import com.liaoinstan.springview.widget.SpringView;
 import com.micro.weishiji.R;
 import com.micro.weishiji.common.base.BaseFragment;
 import com.micro.weishiji.common.base.Global;
+import com.micro.weishiji.takeout.persenter.HomeFragment1Presenter;
+
+import javax.inject.Inject;
 
 /**
  * Created by Administrator on 2017/8/24.
@@ -41,6 +44,9 @@ public class MainFragment1 extends BaseFragment {
     private LinearLayout llPopRoot02;
     private LinearLayout llPopContent02OrderBy;
     private ListView lvOrderBy;
+
+    @Inject
+    HomeFragment1Presenter presenter;
     @Override
     public int getLayoutRes() {
         return R.layout.fragment_01;
@@ -90,7 +96,10 @@ public class MainFragment1 extends BaseFragment {
             public void onRefresh() {   // 下拉刷新
                  //showToast("下拉刷新");
                 Toast.makeText(getActivity(),"下拉刷新",Toast.LENGTH_SHORT).show();
-               // presenter.getHomeData();
+                if (presenter!=null){
+                    presenter.getHomeData();
+
+                }
                 // springView.onFinishFreshAndLoad();
             }
 
@@ -107,9 +116,11 @@ public class MainFragment1 extends BaseFragment {
 
     }
 
+
+
     @Override
     public void initData() {
-
+        presenter = new HomeFragment1Presenter(this);
     }
 
     @Override

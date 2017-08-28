@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
@@ -29,6 +28,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:25.2.0'
 
+
     // Retrofit
     compile 'com.squareup.retrofit2:retrofit:2.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.0.2'
@@ -38,4 +38,9 @@ dependencies {
 
     // springview: 下拉刷新和加载更多
     compile 'com.liaoinstan.springview:library:1.2.6'
+
+    // GreenDao
+    compile 'de.greenrobot:greendao:2.1.0'
+    compile 'de.greenrobot:greendao-generator:2.1.0'
+    compile 'javax.inject:javax.inject:1'
 }
