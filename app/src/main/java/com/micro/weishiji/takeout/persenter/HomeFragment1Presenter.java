@@ -170,8 +170,8 @@ public class HomeFragment1Presenter extends BasePresenter {
         if (firstPage)
             mPageNo = 1;
         // 0: 获取所有的商家
-       // mProtocol.getShopList(mCallback, mPageNo,
-       //         mPageCount, shopCategory, orderBy, firstPage);
+        mProtocol.getShopList(mCallback, mPageNo,
+                mPageCount, shopCategory, orderBy, firstPage);
     }
 
     /** 下拉刷新 */

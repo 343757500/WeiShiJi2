@@ -14,6 +14,8 @@ import com.micro.weishiji.R;
 import com.micro.weishiji.common.base.BaseActivity;
 import com.micro.weishiji.common.base.Global;
 import com.micro.weishiji.common.ui.GradientTab;
+import com.micro.weishiji.takeout.db.greendao.CartGoods;
+import com.micro.weishiji.takeout.model.bean.local.ShopList;
 import com.micro.weishiji.takeout.ui.adapter.MyFragmentAdapter;
 import com.micro.weishiji.takeout.ui.fragment.MainFragment1;
 import com.micro.weishiji.takeout.ui.fragment.MainFragment2;
@@ -46,6 +48,8 @@ public class MainActivity extends BaseActivity {
             R.drawable.icon_tab_03_selected,
             R.drawable.icon_tab_04_selected,
     };
+
+    private MainFragment1 mainFragment1;
 
     /** 选项卡控件 */
     private GradientTab[] mTabs = new GradientTab[4];
@@ -156,6 +160,35 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onClick(View v, int id) {
 
+    }
+
+
+    /** 刷新商家购物车商品数量 */
+    public void updateShopGoodsCount() {
+        showToast("update");
+        // 刷新列表商家的购物车商品数量
+        // 获取购物车中所有的商品
+        List<CartGoods> allCartGoods = mainFragment1
+                .getPresenter().getGoodsDao().queryAll();
+        List listData = mainFragment1.getListData();
+
+        for (int i = 0; i < listData.size(); i ++) {
+            Object bean = listData.get(i);
+            // 商家列表项，有可能是头部和广告
+            if (bean instanceof ShopList.ShopListBean) {
+                ShopList.ShopListBean shop = (ShopList.ShopListBean) bean;
+                int shopId = shop.getId();
+                int shopCount = 0;  // 该商家商品的缓存数量
+                // 遍历购物车缓存对象
+                for (CartGoods goods : allCartGoods) {
+                    if (goods.getShopId() == shopId) {
+                        shopCount += goods.getCount();
+                    }
+                }
+                shop.mBuyCount = shopCount;
+            }
+        }
+        mainFragment1.getHomeAdapter().notifyDataSetChanged();
     }
 
 }

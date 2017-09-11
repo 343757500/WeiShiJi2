@@ -2,8 +2,8 @@ package com.micro.weishiji.common.base;
 
 public class Const {
 
-	public static final String HOST_IP = "192.168.56.1";
-//	public static final String HOST_IP = "45.78.29.236";
+	//public static final String HOST_IP = "192.168.56.1";
+	public static final String HOST_IP = "192.168.1.39";
     public static final String KEY_BEAN =  "data";
     public static final String KEY_CART_GOODS =  "cart_goods";
 

@@ -1,6 +1,9 @@
 package com.micro.weishiji.takeout.ui.fragment;
 
+import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -13,8 +16,20 @@ import com.liaoinstan.springview.container.MeituanHeader;
 import com.liaoinstan.springview.widget.SpringView;
 import com.micro.weishiji.R;
 import com.micro.weishiji.common.base.BaseFragment;
+import com.micro.weishiji.common.base.Const;
 import com.micro.weishiji.common.base.Global;
+import com.micro.weishiji.takeout.model.IHttpService;
+import com.micro.weishiji.takeout.model.bean.Home;
+import com.micro.weishiji.takeout.model.bean.OrderBy;
+import com.micro.weishiji.takeout.model.bean.local.ShopCategory;
 import com.micro.weishiji.takeout.persenter.HomeFragment1Presenter;
+import com.micro.weishiji.takeout.ui.adapter.HomeAdapter;
+import com.micro.weishiji.takeout.ui.adapter.OrderByAdapter;
+import com.micro.weishiji.takeout.ui.adapter.ShopCategoryAdapter;
+import com.micro.weishiji.takeout.ui.view.MainActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -26,7 +41,7 @@ public class MainFragment1 extends BaseFragment {
 
     private RecyclerView recyclerView;
     //private HomeAdapter homeAdapter;
-
+    private HomeAdapter homeAdapter;
     private SpringView springView;
     private LinearLayout llTitleBar1;
     private TextView tvLocation;
@@ -44,9 +59,26 @@ public class MainFragment1 extends BaseFragment {
     private LinearLayout llPopRoot02;
     private LinearLayout llPopContent02OrderBy;
     private ListView lvOrderBy;
+    private OrderByAdapter mOrderByAdapter;
+    private ShopCategoryAdapter mParentCategoryAdapter;
+
+
+    /** 当前选中的商家类别 */
+    private ShopCategory.CategoryListBean mSelectedCategory;
+    private OrderBy.OrderByListBean mSelectedOrderBy;
 
     @Inject
     HomeFragment1Presenter presenter;
+
+    public HomeFragment1Presenter getPresenter() {
+        return presenter;
+    }
+
+    public List getListData() {
+        return listData;
+    }
+
+
     @Override
     public int getLayoutRes() {
         return R.layout.fragment_01;
@@ -81,8 +113,15 @@ public class MainFragment1 extends BaseFragment {
         lvOrderBy.setDividerHeight(0);
 
 
-
+        initRecyclerView();
         initSpringView();
+    }
+
+    private void initRecyclerView() {
+        recyclerView = findView(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
+        homeAdapter = new HomeAdapter(mActivity, null);
+        recyclerView.setAdapter(homeAdapter);
     }
 
     private void initSpringView() {
@@ -107,6 +146,7 @@ public class MainFragment1 extends BaseFragment {
             public void onLoadmore() {  // 加载更多
                 showToast("加载更多");
                 //presenter.getShopList(getShopCategory(), getOrderBy(), false);
+
             }
         });
     }
@@ -116,15 +156,100 @@ public class MainFragment1 extends BaseFragment {
 
     }
 
+    /** RecyclerView显示的数据集合 */
+    private List listData = new ArrayList();
 
 
     @Override
     public void initData() {
         presenter = new HomeFragment1Presenter(this);
+
+        presenter.getHomeData();
+        presenter.getShopCategoryData();
+        presenter.getOrderByData();
+    }
+
+    @Override
+    public void onHttpSuccess(int reqType, Message msg) {
+        super.onHttpSuccess(reqType, msg);
+
+        if (reqType== IHttpService.TYPE_HOME){
+            Home home=(Home) msg.obj;
+            // 显示首页数据
+            listData = new ArrayList();
+            listData.add(home);
+
+
+            // homeAdapter.setDatas(listData);
+
+            // 加载商家列表数据
+            presenter.getShopList(getShopCategory(), getOrderBy(), true);
+
+            return;
+        }
+
+
+
+        if (reqType == IHttpService.TYPE_SHOP_CATEGORY) {
+            // 所有的商家父类别
+            ArrayList<ShopCategory.CategoryListBean> parentCategory =
+                    (ArrayList<ShopCategory.CategoryListBean>) msg.obj;
+            // 显示父类别
+            mParentCategoryAdapter.setDatas(parentCategory);
+            return;
+        }
+
+
+        if (reqType == IHttpService.TYPE_ORDER_BY) {
+            OrderBy bean = (OrderBy) msg.obj;
+            mOrderByAdapter.setDatas(bean.getOrderByList());
+            return;
+        }
+
+
+
+       if (reqType==IHttpService.TYPE_SHOP_LIST){
+            ArrayList pageDatas = (ArrayList) msg.obj;
+            // 隐藏springView的头部和尾部
+            springView.onFinishFreshAndLoad();
+
+            if (msg.what == Const.TYPE_REFRESH) {   // 下拉刷新
+                ArrayList newDatas = new ArrayList();
+                //  列表头部数据
+                newDatas.add(listData.get(0));
+                // 第一页数据和广告
+                newDatas.addAll(pageDatas);
+
+                listData = newDatas;
+            } else { // 加载更多
+                listData.addAll(pageDatas);
+            }
+            // 刷新列表显示
+            homeAdapter.setDatas(listData);
+
+            // 刷新商家购物车商品数量
+            ((MainActivity) mActivity).updateShopGoodsCount();
+            return;
+        }
+    }
+
+    private int getShopCategory() {
+        // 0: 表示获取所有的商家
+        return (mSelectedCategory == null) ? 0 : mSelectedCategory.getId();
+    }
+
+    private int getOrderBy() {
+        return (mSelectedOrderBy == null) ? 0 : mSelectedOrderBy.getTag();
     }
 
     @Override
     public void onClick(View v, int id) {
 
     }
+
+
+    public HomeAdapter getHomeAdapter() {
+        return homeAdapter;
+    }
+
 }

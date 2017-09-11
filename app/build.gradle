@@ -43,4 +43,13 @@ dependencies {
     compile 'de.greenrobot:greendao:2.1.0'
     compile 'de.greenrobot:greendao-generator:2.1.0'
     compile 'javax.inject:javax.inject:1'
+
+
+    // 图片请求picasso
+    compile 'com.squareup.picasso:picasso:2.3.2'
+
+    // 轮播图实现
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'com.daimajia.slider:library:1.1.5@aar'
+
 }
